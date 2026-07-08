@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaishnavi Srivastava — Android Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0f1e;
+  --card:     #121932;
+  --card-h:   #16203c;
+  --gold:     #c9a84c;
+  --gold2:    #e6c96a;
+  --gold-dim: rgba(201,168,76,0.10);
+  --gold-glow:rgba(201,168,76,0.22);
+  --text:     #ccc9bf;
+  --text-dim: #7a7d8a;
+  --white:    #eae6df;
+  --border:   rgba(201,168,76,0.13);
+  --border-m: rgba(201,168,76,0.28);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;line-height:1.7;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+
+
+#maze-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.055;}
+
+
+.navbar{
+  position:fixed;top:0;left:0;right:0;height:70px;
+  background:rgba(10,15,30,0.93);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  z-index:1000;
+  display:flex;align-items:center;
+  padding:0 60px;
+  gap:0;
+}
+.nav-brand{
+  font-family:'JetBrains Mono',monospace;
+  font-size:15px;font-weight:700;
+  color:var(--gold);letter-spacing:.05em;
+  text-decoration:none;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+#pac-nav{
+  flex:1;
+  height:70px;
+  overflow:hidden;
+  position:relative;
+  pointer-events:none;
+  margin:0 20px;
+  min-width:0;
+}
+#pac-canvas{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  display:block;
+}
+.nav-links{
+  display:flex;align-items:center;gap:36px;
+  flex-shrink:0;
+}
+.nav-links a{
+  font-size:14px;font-weight:500;color:var(--text-dim);
+  text-decoration:none;letter-spacing:.03em;transition:color .2s;
+  white-space:nowrap;
+}
+.nav-links a:hover{color:var(--gold);}
+.nav-resume{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:700;letter-spacing:.1em;
+  color:var(--gold);border:1px solid var(--border-m);
+  padding:9px 20px;border-radius:6px;text-decoration:none;
+  white-space:nowrap;
+  transition:background .2s,box-shadow .2s;
+}
+.nav-resume:hover{background:var(--gold-dim);box-shadow:0 0 16px var(--gold-glow);}
+
+
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:90px 72px 72px;
+  max-width:1280px;margin:0 auto;
+  position:relative;z-index:1;
+}
+.hero-grid{display:grid;grid-template-columns:1fr 380px;gap:90px;align-items:center;width:100%;}
+.hero-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  color:var(--gold);letter-spacing:.22em;
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+}
+.hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--gold);display:block;}
+.hero-name{font-size:clamp(52px,6.5vw,88px);font-weight:700;line-height:1.03;letter-spacing:-.04em;margin-bottom:10px;}
+.hero-name .first{color:var(--white);}
+.hero-name .last{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 55%,#a07830 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.tw-row{
+  font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold);
+  height:30px;display:flex;align-items:center;margin-bottom:28px;opacity:.9;
+}
+#tw{border-right:2px solid var(--gold);padding-right:3px;animation:blink .8s step-end infinite;white-space:nowrap;}
+@keyframes blink{50%{border-color:transparent;}}
+.hero-bio{font-size:18px;color:var(--text-dim);line-height:1.9;max-width:520px;margin-bottom:40px;}
+.hero-bio strong{color:var(--gold);font-weight:600;}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;}
+.btn-p{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;
+  padding:16px 32px;background:linear-gradient(135deg,#c9a84c,#a07830);
+  color:#0a0f1e;border:none;border-radius:8px;text-decoration:none;display:inline-block;
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(201,168,76,.35);}
+.btn-g{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;
+  padding:16px 32px;background:transparent;color:var(--white);
+  border:1px solid var(--border-m);border-radius:8px;text-decoration:none;display:inline-block;
+  transition:border-color .2s,color .2s,background .2s;
+}
+.btn-g:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.hero-right{display:flex;flex-direction:column;align-items:center;gap:36px;}
+.photo-frame{position:relative;width:310px;height:310px;}
+.photo-frame img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:20px;display:block;}
+.photo-fallback{
+  width:100%;height:100%;border-radius:20px;
+  background:linear-gradient(135deg,#111830,#1a2540);
+  display:none;align-items:center;justify-content:center;
+}
+.photo-border{position:absolute;inset:-2px;border-radius:22px;background:linear-gradient(135deg,var(--gold),#6b4f1a);z-index:-1;}
+.avail-pill{
+  position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);
+  background:var(--card);border:1px solid var(--border-m);border-radius:30px;
+  padding:7px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  color:#4caf7d;display:flex;align-items:center;gap:7px;white-space:nowrap;
+}
+.avail-dot{width:7px;height:7px;border-radius:50%;background:#4caf7d;animation:pulse 1.6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hero-stats{display:flex;gap:16px;}
+.stat-block{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:16px 20px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;min-width:80px;transition:border-color .2s;
+}
+.stat-block:hover{border-color:var(--border-m);}
+.stat-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);}
+.stat-lbl{font-size:10px;color:var(--text-dim);letter-spacing:.07em;font-weight:500;}
+
+
+.sec-divider{
+  max-width:1280px;margin:0 auto;padding:0 72px;
+  position:relative;z-index:1;
+}
+.sec-divider-inner{
+  position:relative;height:48px;display:flex;align-items:center;
+}
+.sec-divider-line{
+  flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border-m) 20%,var(--gold) 50%,var(--border-m) 80%,transparent);
+  position:relative;
+}
+
+.sec-divider-orb{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold);
+  position:absolute;
+  top:50%;transform:translateY(-50%);
+  box-shadow:0 0 10px var(--gold-glow);
+  animation:floatOrb 3s ease-in-out infinite;
+}
+.sec-divider-orb:nth-child(1){left:20%;animation-delay:0s;}
+.sec-divider-orb:nth-child(2){left:50%;animation-delay:.8s;width:8px;height:8px;}
+.sec-divider-orb:nth-child(3){left:80%;animation-delay:1.5s;}
+@keyframes floatOrb{0%,100%{transform:translateY(-50%) scale(1);opacity:.6;}50%{transform:translateY(-200%) scale(1.3);opacity:1;}}
+
+
+.section{padding:110px 72px;max-width:1280px;margin:0 auto;position:relative;z-index:1;}
+.sec-eye{
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--gold);letter-spacing:.24em;
+  display:flex;align-items:center;gap:16px;margin-bottom:14px;
+}
+.sec-eye::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border-m),transparent);}
+.sec-title{font-size:clamp(32px,4vw,52px);font-weight:700;letter-spacing:-.03em;margin-bottom:64px;}
+.sec-title .hl{background:linear-gradient(135deg,var(--gold),#a07830);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;}
+.about-text p{font-size:17px;color:var(--text-dim);line-height:1.95;margin-bottom:22px;}
+.about-text p:last-child{margin-bottom:0;}
+.skills-wrap{display:flex;flex-direction:column;gap:0;}
+.skill-row-wrap{margin-bottom:22px;}
+.skill-row-label{display:flex;justify-content:space-between;margin-bottom:9px;}
+.skill-row-label span:first-child{font-size:15px;font-weight:600;color:var(--white);}
+.skill-row-label span:last-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);}
+.skill-track{position:relative;height:10px;background:rgba(201,168,76,0.07);border-radius:5px;overflow:visible;border:1px solid rgba(201,168,76,0.09);}
+.skill-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#6b4f1a,var(--gold));width:0;transition:width 1.1s cubic-bezier(.4,0,.2,1);position:relative;}
+.skill-pac{position:absolute;right:-7px;top:50%;transform:translateY(-50%);width:14px;height:14px;opacity:0;transition:opacity .3s 1s;}
+.skill-pac canvas{display:block;}
+.skill-fill.loaded .skill-pac{opacity:1;}
+
+
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px;}
+.proj-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:40px;position:relative;overflow:hidden;
+  transition:transform .28s,border-color .28s,box-shadow .28s,background .28s;
+  opacity:0;transform:translateY(28px);
+}
+.proj-card.in{opacity:1;transform:translateY(0);transition:opacity .5s ease,transform .5s ease,border-color .28s,box-shadow .28s;}
+.proj-card:hover{transform:translateY(-6px);border-color:var(--border-m);background:var(--card-h);box-shadow:0 24px 52px rgba(0,0,0,.5);}
+.proj-bar{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),#6b4f1a);transform:scaleX(0);transform-origin:left;transition:transform .38s;}
+.proj-card:hover .proj-bar{transform:scaleX(1);}
+.proj-idx{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.12em;margin-bottom:18px;display:block;}
+.proj-title{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:13px;}
+.proj-desc{font-size:15px;color:var(--text-dim);line-height:1.82;margin-bottom:24px;}
+.proj-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.ptag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;padding:5px 12px;background:rgba(201,168,76,0.07);color:var(--gold);border:1px solid rgba(201,168,76,0.16);border-radius:4px;}
+.proj-link{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:.06em;display:inline-flex;align-items:center;gap:8px;transition:gap .2s;}
+.proj-link:hover{gap:14px;}
+
+
+.ach-wrap{position:relative;padding-left:72px;}
+.ach-path-canvas{
+  position:absolute;
+  left:22px;top:0;
+  width:28px;
+  pointer-events:none;
+}
+.ach-item{
+  position:relative;
+  padding-bottom:52px;
+  opacity:0;transform:translateX(-10px);
+  transition:opacity .5s ease,transform .5s ease;
+}
+.ach-item.in{opacity:1;transform:translateX(0);}
+.ach-item:last-child{padding-bottom:0;}
+.ach-pac-wrap{
+  position:absolute;
+  left:-54px;top:0;
+  width:40px;height:40px;
+}
+.ach-pac-wrap canvas{display:block;width:40px;height:40px;}
+.ach-title{font-size:18px;font-weight:700;margin-bottom:7px;letter-spacing:-.01em;color:var(--white);}
+.ach-desc{font-size:15px;color:var(--text-dim);line-height:1.78;}
+
+
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.contact-intro{font-size:17px;color:var(--text-dim);line-height:1.9;margin-bottom:36px;}
+.contact-links{display:flex;flex-direction:column;gap:14px;}
+.clink{display:flex;align-items:center;gap:16px;font-size:15px;color:var(--text-dim);text-decoration:none;font-weight:500;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:12px;transition:border-color .2s,color .2s,background .2s;}
+.clink:hover{border-color:var(--border-m);color:var(--gold);background:var(--gold-dim);}
+.clink-ico{width:38px;height:38px;background:var(--gold-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.contact-cta{background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(106,79,26,.08));border:1px solid var(--border-m);border-radius:20px;padding:48px;display:flex;flex-direction:column;gap:24px;}
+.cta-title{font-size:26px;font-weight:700;background:linear-gradient(135deg,var(--gold),#a07830);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.02em;}
+.cta-body{font-size:15.5px;color:var(--text-dim);line-height:1.8;}
+.cta-btn{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.1em;padding:17px 30px;background:linear-gradient(135deg,#c9a84c,#a07830);color:#0a0f1e;border:none;border-radius:8px;text-decoration:none;display:inline-block;text-align:center;transition:transform .2s,box-shadow .2s;}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(201,168,76,.3);}
+
+footer{border-top:1px solid var(--border);padding:32px 72px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;z-index:1;}
+.footer-l{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:.06em;}
+.footer-r{display:flex;gap:22px;}
+.footer-r a{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);text-decoration:none;letter-spacing:.06em;transition:color .2s;}
+.footer-r a:hover{color:var(--gold);}
+
+
+.reveal{opacity:0;transform:translateY(24px);}
+.reveal.in{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease;}
+
+@media(max-width:1024px){
+  .hero-grid,.about-grid,.contact-grid{grid-template-columns:1fr;}
+  .hero-right{order:-1;}
+  .photo-frame{width:230px;height:230px;}
+  .section,.hero{padding:80px 32px;}
+  .navbar{padding:0 32px;}
+  .sec-divider{padding:0 32px;}
+}
+@media(max-width:640px){
+  .nav-links{display:none;}
+  .proj-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;text-align:center;padding:24px;}
+}
+</style>
+</head>
+<body>
+<canvas id="maze-bg"></canvas>
+
+
+<header class="navbar">
+  <a href="#" class="nav-brand">Vaishnavi Srivastava</a>
+  <div id="pac-nav"><canvas id="pac-canvas"></canvas></div>
+  <nav class="nav-links">
+    <a href="#about">About</a>
+    <a href="#projects">Projects</a>
+    <a href="#achievements">Achievements</a>
+    <a href="#contact">Contact</a>
+    <a href="Vaishnavi_Sri_Resume.pdf" target="_blank" class="nav-resume">RESUME ↗</a>
+  </nav>
+</header>
+
+
+<section class="hero" id="home">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow">ANDROID DEVELOPER</div>
+      <h1 class="hero-name">
+        <span class="first">Vaishnavi</span><br>
+        <span class="last">Srivastava</span>
+      </h1>
+      <div class="tw-row"><span id="tw"></span></div>
+      <p class="hero-bio">I build <strong>beautiful, motion-rich Android apps</strong> with Jetpack Compose. Passionate about UI animations that make apps feel alive — not just functional.</p>
+      <div class="hero-actions">
+        <a href="https://github.com/VaishnaviSri16" target="_blank" class="btn-p">VIEW GITHUB ↗</a>
+        <a href="https://linkedin.com/in/vaishnavi-srivastava-9a706425b" target="_blank" class="btn-g">LINKEDIN ↗</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="photo-frame">
+        <img src="profilePhoto.jpeg" alt="Vaishnavi Srivastava" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="photo-fallback"><svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="28" r="18" fill="rgba(201,168,76,0.2)"/><ellipse cx="40" cy="64" rx="26" ry="18" fill="rgba(201,168,76,0.12)"/></svg></div>
+        <div class="photo-border"></div>
+        <div class="avail-pill"><div class="avail-dot"></div>OPEN TO WORK</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-block"><span class="stat-num">3+</span><span class="stat-lbl">PROJECTS</span></div>
+        <div class="stat-block"><span class="stat-num">3</span><span class="stat-lbl">HACKATHONS</span></div>
+        <div class="stat-block"><span class="stat-num">7.73</span><span class="stat-lbl">CGPA</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="sec-divider"><div class="sec-divider-inner"><div class="sec-divider-line"><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div></div></div></div>
+
+
+<section class="section" id="about">
+  <div class="sec-eye">ABOUT</div>
+  <h2 class="sec-title reveal">Who I <span class="hl">Am</span></h2>
+  <div class="about-grid reveal">
+    <div class="about-text">
+      <p>I'm a Computer Science graduate from ITM GIDA Gorakhpur (BTech 2026), specialising in Android development with a deep focus on UI animations and Jetpack Compose.</p>
+      <p>I believe great apps are felt, not just used. I build interfaces with smooth transitions, satisfying micro-interactions, and motion that guides users naturally — making apps feel premium and alive.</p>
+      <p>Currently open to Android Developer roles and internships where I can contribute to real product UI and grow alongside a strong team.</p>
+    </div>
+    <div class="skills-wrap" id="skillsWrap">
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>Kotlin</span><span>90%</span></div><div class="skill-track"><div class="skill-fill" data-w="90"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>Jetpack Compose</span><span>85%</span></div><div class="skill-track"><div class="skill-fill" data-w="85"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>UI Animations</span><span>82%</span></div><div class="skill-track"><div class="skill-fill" data-w="82"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>MVVM Architecture</span><span>78%</span></div><div class="skill-track"><div class="skill-fill" data-w="78"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>Room Database</span><span>75%</span></div><div class="skill-track"><div class="skill-fill" data-w="75"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>CameraX & ML Kit</span><span>72%</span></div><div class="skill-track"><div class="skill-fill" data-w="72"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>Material Design 3</span><span>83%</span></div><div class="skill-track"><div class="skill-fill" data-w="83"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+      <div class="skill-row-wrap"><div class="skill-row-label"><span>Git & GitHub</span><span>80%</span></div><div class="skill-track"><div class="skill-fill" data-w="80"><div class="skill-pac"><canvas width="14" height="14"></canvas></div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="sec-divider"><div class="sec-divider-inner"><div class="sec-divider-line"><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div></div></div></div>
+
+
+<section class="section" id="projects">
+  <div class="sec-eye">PROJECTS</div>
+  <h2 class="sec-title reveal">Things I've <span class="hl">Built</span></h2>
+  <div class="proj-grid">
+    <div class="proj-card"><div class="proj-bar"></div><span class="proj-idx">01 / PROJECT</span><div class="proj-title">Watchlist 🎬</div><p class="proj-desc">A premium Android app for tracking movies and anime with a cinematic dark theme, smart status management, personal ratings, and offline persistence using Room Database.</p><div class="proj-tags"><span class="ptag">Kotlin</span><span class="ptag">Jetpack Compose</span><span class="ptag">MVVM</span><span class="ptag">Room DB</span><span class="ptag">Retrofit</span></div><a href="https://github.com/VaishnaviSri16/WatchList" target="_blank" class="proj-link">VIEW ON GITHUB →</a></div>
+    <div class="proj-card"><div class="proj-bar"></div><span class="proj-idx">02 / PROJECT</span><div class="proj-title">Yatra 🗺️</div><p class="proj-desc">Animated travel discovery app showcasing popular Indian destinations — Shimla, Manali, Kasol, Spiti Valley and more. Features animated carousels, destination detail screens, and a full booking confirmation flow.</p><div class="proj-tags"><span class="ptag">Kotlin</span><span class="ptag">Jetpack Compose</span><span class="ptag">Animations</span><span class="ptag">MVVM</span><span class="ptag">Navigation</span></div><a href="https://github.com/VaishnaviSri16" target="_blank" class="proj-link">VIEW ON GITHUB →</a></div>
+    <div class="proj-card"><div class="proj-bar"></div><span class="proj-idx">03 / PROJECT</span><div class="proj-title">BloodConnect 🩸</div><p class="proj-desc">Android app for managing and filtering blood donor records by blood group. Built with offline-first architecture — all data stored locally using Room Database with real-time filtering and a clean Jetpack Compose UI.</p><div class="proj-tags"><span class="ptag">Kotlin</span><span class="ptag">Jetpack Compose</span><span class="ptag">Room DB</span><span class="ptag">MVVM</span><span class="ptag">Coroutines</span></div><a href="https://github.com/VaishnaviSri16/BloodConnect-App" target="_blank" class="proj-link">VIEW ON GITHUB →</a></div>
+    <div class="proj-card"><div class="proj-bar"></div><span class="proj-idx">04 / PROJECT</span><div class="proj-title">FaceFit AR 📸</div><p class="proj-desc">Real-time AR face filter app using CameraX and ML Kit face detection. Applies virtual overlays aligned precisely to facial landmarks with a responsive Jetpack Compose UI and dynamic overlay rendering.</p><div class="proj-tags"><span class="ptag">Kotlin</span><span class="ptag">CameraX</span><span class="ptag">ML Kit</span><span class="ptag">Jetpack Compose</span></div><a href="https://github.com/VaishnaviSri16" target="_blank" class="proj-link">VIEW ON GITHUB →</a></div>
+  </div>
+</section>
+
+<div class="sec-divider"><div class="sec-divider-inner"><div class="sec-divider-line"><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div></div></div></div>
+
+<section class="section" id="achievements">
+  <div class="sec-eye">ACHIEVEMENTS</div>
+  <h2 class="sec-title reveal">Wins & <span class="hl">Milestones</span></h2>
+  <div class="ach-wrap" id="achWrap">
+    <canvas class="ach-path-canvas" id="achPath"></canvas>
+    <div class="ach-item">
+      <div class="ach-pac-wrap"><canvas width="40" height="40"></canvas></div>
+      <div class="ach-title">U-HACK 4.0 Hackathon — 2026</div>
+      <p class="ach-desc">Built QueueLess — a real-time digital queue management application. Participated and earned certificate of achievement.</p>
+    </div>
+    <div class="ach-item">
+      <div class="ach-pac-wrap"><canvas width="40" height="40"></canvas></div>
+      <div class="ach-title">Smart India Hackathon — 2025</div>
+      <p class="ach-desc">Participated in the Smart India Hackathon 2025, competing at the institute level alongside strong teams on nationally relevant problem statements.</p>
+    </div>
+    <div class="ach-item">
+      <div class="ach-pac-wrap"><canvas width="40" height="40"></canvas></div>
+      <div class="ach-title">HP Dreams Unlocked Season 1 — 2025</div>
+      <p class="ach-desc">Presented DubSmart AI — an AI-powered automated movie dubbing solution featuring voice cloning and lip-sync technology.</p>
+    </div>
+    <div class="ach-item">
+      <div class="ach-pac-wrap"><canvas width="40" height="40"></canvas></div>
+      <div class="ach-title">Samsung Innovation Campus</div>
+      <p class="ach-desc">Completed Samsung's official Coding & Programming certification covering programming fundamentals and application development.</p>
+    </div>
+    <div class="ach-item">
+      <div class="ach-pac-wrap"><canvas width="40" height="40"></canvas></div>
+      <div class="ach-title">BTech CSE — ITM GIDA Gorakhpur</div>
+      <p class="ach-desc">Computer Science Engineering, CGPA 7.73. Graduated May 2026. Specialised in Android development and UI engineering.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sec-divider"><div class="sec-divider-inner"><div class="sec-divider-line"><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div><div class="sec-divider-orb"></div></div></div></div>
+
+
+<section class="section" id="contact">
+  <div class="sec-eye">CONTACT</div>
+  <h2 class="sec-title reveal">Let's Work <span class="hl">Together</span></h2>
+  <div class="contact-grid reveal">
+    <div>
+      <p class="contact-intro">I'm actively looking for Android Developer roles and internships — full-time or freelance. If you're building something and need someone who cares deeply about UI quality and animation, let's talk.</p>
+      <div class="contact-links">
+        <a href="mailto:vaishnavisrivastava68581@gmail.com" class="clink"><div class="clink-ico">✉️</div>vaishnavisrivastava68581@gmail.com</a>
+        <a href="https://github.com/VaishnaviSri16" target="_blank" class="clink"><div class="clink-ico">🐙</div>github.com/VaishnaviSri16</a>
+        <a href="https://linkedin.com/in/vaishnavi-srivastava-9a706425b" target="_blank" class="clink"><div class="clink-ico">💼</div>linkedin.com/in/vaishnavi-srivastava</a>
+        <a href="tel:+919264907315" class="clink"><div class="clink-ico">📞</div>+91 92649 07315</a>
+      </div>
+    </div>
+    <div class="contact-cta">
+      <div class="cta-title">Open to Opportunities</div>
+      <p class="cta-body">Whether it's a full-time role, internship, or a freelance UI project — I'd love to hear about what you're building and how I can contribute.</p>
+      <a href="mailto:vaishnavisrivastava68581@gmail.com" class="cta-btn">SEND ME A MESSAGE →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-l">© Vaishnavi Srivastava — Android Developer</span>
+  <div class="footer-r">
+    <a href="https://github.com/VaishnaviSri16" target="_blank">GITHUB</a>
+    <a href="https://linkedin.com/in/vaishnavi-srivastava-9a706425b" target="_blank">LINKEDIN</a>
+    <a href="mailto:vaishnavisrivastava68581@gmail.com">EMAIL</a>
+  </div>
+</footer>
+
+<script>
+
+(function(){
+  const c=document.getElementById('maze-bg');
+  const ctx=c.getContext('2d');
+  const CELL=44;
+  function rng(seed){return((seed*1664525+1013904223)>>>0)/4294967296;}
+  function draw(){
+    c.width=window.innerWidth;
+    c.height=Math.max(document.body.scrollHeight,window.innerHeight);
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle='rgba(201,168,76,0.55)';ctx.lineWidth=1;
+    const cols=Math.ceil(c.width/CELL)+1,rows=Math.ceil(c.height/CELL)+1;
+    for(let r=0;r<rows;r++){
+      for(let col=0;col<cols;col++){
+        const x=col*CELL,y=r*CELL;
+        if(rng(r*1000+col*7+1)>0.38){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+CELL,y);ctx.stroke();}
+        if(rng(r*1000+col*7+2)>0.38){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+CELL);ctx.stroke();}
+      }
+    }
+    ctx.fillStyle='rgba(201,168,76,0.72)';
+    for(let r=0;r<rows;r++){
+      for(let col=0;col<cols;col++){
+        const s=rng(r*999+col*13+5);
+        if(s>0.68){ctx.beginPath();ctx.arc(col*CELL,r*CELL,s>0.9?4:2.2,0,Math.PI*2);ctx.fill();}
+      }
+    }
+  }
+  draw();
+  let resizeT;window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(draw,200);});
+})();
+
+const phrases=['UI Animations Specialist','Android Developer','Jetpack Compose Dev','Motion Design Lover'];
+let pi=0,ci=0,del=false;
+const twEl=document.getElementById('tw');
+function typewrite(){
+  const cur=phrases[pi];
+  if(!del){twEl.textContent=cur.slice(0,++ci);if(ci===cur.length){del=true;setTimeout(typewrite,1900);return;}}
+  else{twEl.textContent=cur.slice(0,--ci);if(ci===0){del=false;pi=(pi+1)%phrases.length;}}
+  setTimeout(typewrite,del?55:90);
+}
+typewrite();
+
+
+const GHOST_COLORS=['#c0392b','#8e44ad','#16a085','#d35400'];
+function drawPac(ctx,x,y,r,mouth,flipX){
+  const ma=mouth*Math.PI/180;
+  ctx.save();
+  if(flipX){ctx.translate(x*2,0);ctx.scale(-1,1);}
+  ctx.beginPath();ctx.moveTo(x,y);
+  ctx.arc(x,y,r,ma,(Math.PI*2)-ma);
+  ctx.closePath();ctx.fillStyle='#FFD700';ctx.fill();
+  ctx.restore();
+}
+function drawGhost(ctx,x,y,r,color){
+  const top=y-r;
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.arc(x,top,r,Math.PI,0);
+  ctx.lineTo(x+r,y+r);
+  const ww=r;
+  for(let i=2;i>=0;i--) ctx.quadraticCurveTo(x-r+ww*i+ww/2,i%2===0?y+r-r*.45:y+r,x-r+ww*i,y+r);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle='white';
+  ctx.beginPath();ctx.ellipse(x-r*.35,top,r*.3,r*.44,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x+r*.35,top,r*.3,r*.44,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#0a0f1e';
+  ctx.beginPath();ctx.arc(x-r*.22,top,r*.16,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+r*.48,top,r*.16,0,Math.PI*2);ctx.fill();
+}
+
+
+(function(){
+  const wrap=document.getElementById('pac-nav');
+  const cv=document.getElementById('pac-canvas');
+  const ctx=cv.getContext('2d');
+  const H=70,PAC_R=10,GHOST_R=8,GHOST_GAP=20;
+  let W=0,dots=[],px=-24,dir=1,mouth=0,mDir=1;
+
+  function resize(){
+    W=wrap.offsetWidth;
+    cv.width=W;cv.height=H;
+    buildDots();
+  }
+  function buildDots(){
+    dots=[];let x=14,idx=0;
+    while(x<W-10){dots.push({x,eaten:false,big:idx%7===0});x+=22;idx++;}
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    
+    dots.forEach(d=>{
+      if(d.eaten)return;
+      ctx.beginPath();ctx.arc(d.x,H/2,d.big?3.5:2,0,Math.PI*2);
+      ctx.fillStyle='rgba(201,168,76,0.38)';ctx.fill();
+    });
+    
+    px+=1.4*dir;
+    if(px>W+20){dir=-1;dots.forEach(d=>d.eaten=false);}
+    if(px<-20){dir=1;dots.forEach(d=>d.eaten=false);}
+    mouth+=mDir*4;if(mouth>32||mouth<0)mDir*=-1;
+    
+    ctx.save();ctx.rect(0,0,W,H);ctx.clip();
+    GHOST_COLORS.forEach((c,i)=>{
+      const gx=px-(i+1)*GHOST_GAP*dir;
+      drawGhost(ctx,gx,H/2+2,GHOST_R,c);
+    });
+    drawPac(ctx,px,H/2,PAC_R,mouth,dir===-1);
+    ctx.restore();
+    
+    dots.forEach(d=>{if(Math.abs(d.x-px)<13)d.eaten=true;});
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{if(en.isIntersecting)en.target.classList.add('in');});
+},{threshold:0.08});
+document.querySelectorAll('.reveal,.proj-card').forEach((el,i)=>{
+  el.style.transitionDelay=i*45+'ms';obs.observe(el);
+});
+
+function drawTipPac(cv){
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,14,14);
+  ctx.beginPath();ctx.moveTo(7,7);
+  ctx.arc(7,7,6,0.4,(Math.PI*2)-0.4);
+  ctx.closePath();ctx.fillStyle='#FFD700';ctx.fill();
+  ctx.beginPath();ctx.arc(9.5,5,1.3,0,Math.PI*2);ctx.fillStyle='#0a0f1e';ctx.fill();
+}
+const skillObs=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.querySelectorAll('.skill-fill').forEach((bar,i)=>{
+        setTimeout(()=>{
+          bar.style.width=bar.dataset.w+'%';
+          setTimeout(()=>{
+            bar.classList.add('loaded');
+            const cv=bar.querySelector('.skill-pac canvas');
+            if(cv)drawTipPac(cv);
+          },1150);
+        },i*110);
+      });
+      skillObs.unobserve(en.target);
+    }
+  });
+},{threshold:0.25});
+const sw=document.getElementById('skillsWrap');
+if(sw)skillObs.observe(sw);
+
+(function(){
+  const wrap=document.getElementById('achWrap');
+  if(!wrap)return;
+
+  const items=[...wrap.querySelectorAll('.ach-item')];
+  const slots=items.map(it=>it.querySelector('.ach-pac-wrap canvas'));
+  const pathCv=document.getElementById('achPath');
+  let currentActive=-1;
+
+  function sizePathCv(){
+    pathCv.width=28;
+    pathCv.height=wrap.offsetHeight;
+    drawPath();
+  }
+  function drawPath(){
+    const ctx=pathCv.getContext('2d');
+    ctx.clearRect(0,0,28,pathCv.height);
+    ctx.setLineDash([6,10]);
+    ctx.strokeStyle='rgba(201,168,76,0.18)';
+    ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(14,pathCv.height);ctx.stroke();
+  }
+  sizePathCv();
+  window.addEventListener('resize',sizePathCv);
+
+  function drawSlotPac(cv,active){
+    const ctx=cv.getContext('2d');
+    const W=40,H=40;
+    ctx.clearRect(0,0,W,H);
+    if(!active){
+      
+      ctx.beginPath();ctx.arc(20,20,16,0,Math.PI*2);
+      ctx.strokeStyle='rgba(201,168,76,0.15)';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.stroke();
+      ctx.setLineDash([]);
+      return;
+    }
+   
+    ctx.beginPath();ctx.arc(20,20,18,0,Math.PI*2);
+    ctx.fillStyle='rgba(201,168,76,0.1)';ctx.fill();
+    ctx.strokeStyle='rgba(201,168,76,0.45)';ctx.lineWidth=1.5;ctx.setLineDash([]);ctx.stroke();
+    
+    ctx.beginPath();ctx.moveTo(20,20);
+    ctx.arc(20,20,12,0.4,(Math.PI*2)-0.4);
+    ctx.closePath();ctx.fillStyle='#FFD700';ctx.fill();
+   
+    ctx.beginPath();ctx.arc(23,16,2,0,Math.PI*2);ctx.fillStyle='#0a0f1e';ctx.fill();
+    
+    ctx.beginPath();ctx.arc(20,20,18,0,Math.PI*2);
+    ctx.strokeStyle='rgba(201,168,76,0.2)';ctx.lineWidth=4;ctx.stroke();
+  }
+
+  
+  slots.forEach(cv=>drawSlotPac(cv,false));
+
+  function update(){
+    const viewTrigger=window.scrollY+window.innerHeight*0.72;
+    let newActive=-1;
+    items.forEach((item,i)=>{
+      const top=item.getBoundingClientRect().top+window.scrollY;
+      if(top<viewTrigger) newActive=i;
+    });
+    if(newActive!==currentActive){
+      currentActive=newActive;
+      slots.forEach((cv,i)=>drawSlotPac(cv,i<=currentActive));
+      
+      items.forEach((item,i)=>{
+        if(i<=currentActive) item.classList.add('in');
+        else item.classList.remove('in');
+      });
+    }
+  }
+
+  window.addEventListener('scroll',update,{passive:true});
+  update();
+})();
+</script>
+</body>
+</html>
